@@ -1,0 +1,78 @@
+version: '2'
+
+volumes:
+  postgresql-db:
+    driver: local
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: pleroma-nginx
+    expose:
+      - "20091"
+    restart: always
+    tty: false
+    environment:
+      - "VIRTUAL_HOST=<< DOMAIN >>"
+      - "VIRTUAL_PORT=20091"
+      - "VIRTUAL_PROTO=https"
+      - "LETSENCRYPT_HOST=<< DOMAIN >>"
+      - "LETSENCRYPT_EMAIL=<< MAIL_ADDRESS >>"
+      - "LETSENCRYPT_TEST=false"
+    links:
+      - web
+    depends_on:
+      - web
+    volumes:
+      - ./setting/nginx/conf.d:/etc/nginx/conf.d
+    volumes_from:
+      - container:proxy-nginx
+    networks:
+      - front
+      - back-pleroma
+      
+  db:
+    restart: always
+    image: postgres:9.6-alpine
+    container_name: pleroma-db
+    environment:
+      POSTGRES_USER: pleroma
+      POSTGRES_PASSWORD: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      POSTGRES_DB: pleroma
+    volumes:
+      - postgresql-db:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - back-pleroma
+
+  web:
+    build: .
+    image: pleroma
+    container_name: pleroma-web
+    environment:
+      MIX_ENV: prod
+    restart: always
+    stdin_open: true
+    tty: true
+    command: mix ecto.migrate && mix phx.server
+    expose:
+      - "4000"
+    links:
+      - db
+    depends_on:
+      - db
+    volumes:
+      - ./uploads:/pleroma/uploads
+      - ./setting/web/config/prod.secret.exs:/pleroma/config/prod.secret.exs
+      - ./priv:/pleroma/priv
+    networks:
+      - front
+      - back-pleroma
+
+networks:
+  front:
+    external: true
+  back-pleroma:
+    external: true
