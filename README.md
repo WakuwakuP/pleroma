@@ -1,5 +1,15 @@
-# pleroma
-my pleroma config
+# my-pleroma
+
+docker pleroma
+
+## install
+
+```
+git clone --recursive https://github.com/WakuwakuP/my-pleroma.git
+docker network create --driver bridge back-pleroma
+docker-compose build
+docker-compose up -d
+```
 
 ## update
 
