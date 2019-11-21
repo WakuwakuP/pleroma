@@ -4,10 +4,10 @@ docker pleroma
 
 ## install
 
-nginx-proxyを作成する
+[nginx-proxy](https://github.com/wakuwakup/nginx-proxy-docker-compose)を作成する
 
 ```
-git clone --recursive https://github.com/WakuwakuP/my-pleroma.git
+git clone --recursive https://github.com/WakuwakuP/pleroma.git
 docker network create --driver bridge back-pleroma
 docker-compose build
 docker-compose up -d
