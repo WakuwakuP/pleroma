@@ -1,8 +1,10 @@
-version: '2'
+version: '3.7'
 
 volumes:
   postgresql-db:
     driver: local
+  certs:
+    external: true
 
 services:
   nginx:
@@ -25,8 +27,7 @@ services:
       - web
     volumes:
       - ./setting/nginx/conf.d:/etc/nginx/conf.d
-    volumes_from:
-      - container:proxy-nginx
+      - certs:/etc/nginx/certs
     networks:
       - front
       - back-pleroma
@@ -70,6 +71,12 @@ services:
     networks:
       - front
       - back-pleroma
+    deploy:
+      replicas: 1
+      update_config: 
+        parallelism: 1
+        delay: 15m
+        order: start-first
 
 networks:
   front:

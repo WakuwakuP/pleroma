@@ -1,8 +1,10 @@
-# my-pleroma
+# pleroma
 
 docker pleroma
 
 ## install
+
+nginx-proxyを作成する
 
 ```
 git clone --recursive https://github.com/WakuwakuP/my-pleroma.git
@@ -14,11 +16,12 @@ docker-compose up -d
 ## update
 
 ```sh
-git submodule foreach git pull origin develop
-docker-compose up -d --build
+git submodule foreach git pull origin stable
+docker-compose build
 
 # build終了まで待つ
 
-docker-compose exec web mix ecto.migrate
-docker-compose restart web
+docker-compose run --rm web mix ecto.migrate
+docker-compose down
+docker-compose up -d
 ```
