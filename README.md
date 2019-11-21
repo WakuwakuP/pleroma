@@ -25,3 +25,11 @@ docker-compose run --rm web mix ecto.migrate
 docker-compose down
 docker-compose up -d
 ```
+
+```sh
+# db backup
+docker-compose exec db pg_dump -d pleroma -U pleroma --format=custom -f /pgdump/pleroma.pgdump
+
+# db restore
+docker-compose exec db pg_restore -d pleroma -U pleroma -v -1 /pgdump/pleroma.pgdump
+```
