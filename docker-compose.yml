@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.4'
 
 volumes:
   postgresql-db:
@@ -15,33 +15,34 @@ services:
     restart: always
     tty: false
     environment:
-      - "VIRTUAL_HOST=<< DOMAIN >>"
-      - "VIRTUAL_PORT=20091"
+      - "VIRTUAL_HOST=${PLEROMA_HOSTNAME}"
+      - "VIRTUAL_PORT=${PLEROMA_VIRTUAL_PORT}"
       - "VIRTUAL_PROTO=https"
-      - "LETSENCRYPT_HOST=<< DOMAIN >>"
-      - "LETSENCRYPT_EMAIL=<< MAIL_ADDRESS >>"
+      - "LETSENCRYPT_HOST=${PLEROMA_HOSTNAME}"
+      - "LETSENCRYPT_EMAIL=${PLEROMA_LETSENCRYPT_EMAIL}"
       - "LETSENCRYPT_TEST=false"
     links:
       - web
     depends_on:
       - web
     volumes:
+      - ./setting/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./setting/nginx/conf.d:/etc/nginx/conf.d
       - certs:/etc/nginx/certs
     networks:
       - front
       - back-pleroma
-      
+
   db:
     restart: always
     image: postgres:9.6-alpine
     container_name: pleroma-db
     environment:
       POSTGRES_USER: pleroma
-      POSTGRES_PASSWORD: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      POSTGRES_PASSWORD: ${PLEROMA_DB_PASSWORD}
       POSTGRES_DB: pleroma
     volumes:
-      - postgresql-db:/var/lib/postgresql/data
+      - ${PLEROMA_DB_DIR}:/var/lib/postgresql/data
       - ./postgres:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
@@ -49,34 +50,23 @@ services:
       - back-pleroma
 
   web:
-    build: .
+    build: docker/otp/.
     image: pleroma
-    container_name: pleroma-web
+    #container_name: pleroma_web
+    restart: always
     environment:
       MIX_ENV: prod
-    restart: always
-    stdin_open: true
-    tty: true
-    command: mix ecto.migrate && mix phx.server
-    expose:
-      - "4000"
-    links:
-      - db
+    ports:
+      - '127.0.0.1:4000:4000'
+    volumes:
+      - ./data/pleroma/content/uploads:/var/lib/pleroma/uploads
+      - ./pleroma-custom/priv/static:/var/lib/pleroma/static
+      - ./setting/web/config/prod.secret.exs:/etc/pleroma/config.exs:ro
     depends_on:
       - db
-    volumes:
-      - ./uploads:/pleroma/uploads
-      - ./setting/web/config/prod.secret.exs:/pleroma/config/prod.secret.exs
-      - ./priv:/pleroma/priv
     networks:
       - front
       - back-pleroma
-    deploy:
-      replicas: 1
-      update_config: 
-        parallelism: 1
-        delay: 15m
-        order: start-first
 
 networks:
   front:

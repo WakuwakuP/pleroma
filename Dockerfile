@@ -8,6 +8,8 @@ RUN apk -U upgrade \
   && apk add -t build-dependencies \
   build-base \
   && apk add git \
+  && apk add cmake \
+  && apk add file-dev \
   && rm -rf /tmp/* /var/cache/apk/* \
   && mkdir /pleroma/uploads
 
@@ -25,3 +27,4 @@ RUN cd /pleroma \
 VOLUME /pleroma/uploads/
 VOLUME /pleroma/config/
 VOLUME /pleroma/priv/
+VOLUME /pleroma/deps/

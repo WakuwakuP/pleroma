@@ -1,0 +1,9 @@
+version: "2.3"
+services:
+  db:
+    volumes:
+      - ./data/pleroma/config:/tmp/config:ro
+
+  web:
+    volumes:
+      - ./data/pleroma/config:/tmp/config
