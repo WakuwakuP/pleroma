@@ -8,26 +8,26 @@ volumes:
 
 services:
   nginx:
-    image: nginx:alpine
+    image: nginx:latest
     container_name: pleroma-nginx
     expose:
       - "20091"
     restart: always
     tty: false
     environment:
-      - "VIRTUAL_HOST=${PLEROMA_HOSTNAME}"
-      - "VIRTUAL_PORT=${PLEROMA_VIRTUAL_PORT}"
-      - "VIRTUAL_PROTO=https"
-      - "LETSENCRYPT_HOST=${PLEROMA_HOSTNAME}"
-      - "LETSENCRYPT_EMAIL=${PLEROMA_LETSENCRYPT_EMAIL}"
-      - "LETSENCRYPT_TEST=false"
+      - VIRTUAL_HOST=${PLEROMA_HOSTNAME}
+      - VIRTUAL_PORT=${PLEROMA_VIRTUAL_PORT}
+      - VIRTUAL_PROTO=https
+      - LETSENCRYPT_HOST=${PLEROMA_HOSTNAME}
+      - LETSENCRYPT_EMAIL=${PLEROMA_LETSENCRYPT_EMAIL}
+      - LETSENCRYPT_TEST=false
     links:
       - web
     depends_on:
       - web
     volumes:
       - ./setting/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./setting/nginx/conf.d:/etc/nginx/conf.d
+      - ./setting/nginx/templates:/etc/nginx/tem
       - certs:/etc/nginx/certs
     networks:
       - front
