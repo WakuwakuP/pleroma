@@ -1,3 +1,3 @@
-[submodule "pleroma-custom"]
+[submodule "pleroma-custom.git"]
 	path = pleroma-custom
 	url = https://github.com/WakuwakuP/pleroma-custom.git
