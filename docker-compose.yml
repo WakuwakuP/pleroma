@@ -27,7 +27,7 @@ services:
       - web
     volumes:
       - ./setting/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./setting/nginx/templates:/etc/nginx/tem
+      - ./setting/nginx/templates:/etc/nginx/templates
       - certs:/etc/nginx/certs
     networks:
       - front
@@ -44,6 +44,7 @@ services:
     volumes:
       - ${PLEROMA_DB_DIR}:/var/lib/postgresql/data
       - ./postgres:/docker-entrypoint-initdb.d
+      - ./pgdunp:/pgdunp
     ports:
       - "5432:5432"
     networks:
@@ -60,7 +61,7 @@ services:
       - '127.0.0.1:4000:4000'
     volumes:
       - ./data/pleroma/content/uploads:/var/lib/pleroma/uploads
-      - ./pleroma-custom/priv/static:/var/lib/pleroma/static
+      - ./pleroma-custom/static:/var/lib/pleroma/static
       - ./setting/web/config/prod.secret.exs:/etc/pleroma/config.exs:ro
     depends_on:
       - db

@@ -13,15 +13,14 @@ RUN apk add --no-cache \
 RUN echo $FLAVOUR \
     && echo $PLEROMA_VER
 
+ARG NOW_DATETIME
+RUN echo $NOW_DATETIME
+
 RUN curl https://git.pleroma.social/api/v4/projects/2/jobs/artifacts/${PLEROMA_VER}/download?job=${FLAVOUR} -o /tmp/pleroma.zip \
-    && unzip /tmp/pleroma.zip -d /tmp/ \
+    && unzip /tmp/pleroma.zip -d /tmp/pleroma/ \
     && rm /tmp/pleroma.zip
 
-
 FROM alpine:latest
-
-ENV UID=911 GID=911 \
-    MIX_ENV=prod
 
 RUN apk -U upgrade \
     && apk add --no-cache \
@@ -32,10 +31,14 @@ RUN apk -U upgrade \
     exiftool \
     unzip
 
+ARG UID=911
+ARG GID=911
+ENV MIX_ENV=prod
+
 RUN addgroup -g ${GID} pleroma \
     && adduser --system --shell /bin/false --home /opt/pleroma -D -G pleroma -u ${UID} pleroma
 
-COPY --from=builder --chown=pleroma:root /tmp/release/ /opt/pleroma
+COPY --from=builder --chown=pleroma:root /tmp/pleroma/release/ /opt/pleroma
 
 RUN mkdir --parents /var/lib/pleroma /etc/pleroma \
     && chown -R pleroma /var/lib/pleroma /etc/pleroma
@@ -44,6 +47,8 @@ USER pleroma
 
 VOLUME ["/var/lib/pleroma/uploads", "/var/lib/pleroma/static", "/etc/pleroma"]
 
-ENTRYPOINT ["/opt/pleroma/bin/pleroma", "start"]
+ENTRYPOINT ["/opt/pleroma/bin/pleroma"]
+
+CMD ["start"]
 
 EXPOSE 4000/tcp

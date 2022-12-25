@@ -6,19 +6,23 @@ cd "$(dirname "$0")"
 usage() {
 cat <<USAGE
 Usage: $0 [command]
-        setup           - build, configure, initialize
-        build           - build images
-        configure       - generate config files
-        initialize      - initialize database
-        start           - start Pleroma
-        stop            - stop Pleroma
+        setup            - build, configure, initialize
+        build            - build images
+        configure        - generate config files
+        initialize       - initialize database
+        start            - start Pleroma
+        stop             - stop Pleroma
+        update-build     - update Pleroma images
+        update-container - update Pleroma containers
+        update           - update Pleroma images and containers
 USAGE
 }
 
 build() {
         echo
         echo Building images
-        docker-compose build
+        docker-compose build db nginx
+        docker-compose build --build-arg NOW_DATETIME=$(date +%Y%m%d%H%M%S) --build-arg UID=$(id -u) --build-arg GID=$(id -g) web
 }
 
 mk_pleroma_config() {
@@ -63,6 +67,17 @@ stop() {
         docker-compose stop
 }
 
+update_build() {
+        docker-compose build db nginx
+        docker-compose build --build-arg NOW_DATETIME=$(date +%Y%m%d%H%M%S) --build-arg UID=$(id -u) --build-arg GID=$(id -g) web
+}
+
+update_container() {
+        docker-compose down
+        docker-compose run --rm web migrate
+        docker-compose up -d
+}
+
 if [ -z "$CMD" ]; then
         usage
         exit 1
@@ -90,6 +105,16 @@ case "$CMD" in
         ;;
         stop)
                 stop
+        ;;
+        update-build)
+                update_build
+        ;;
+        update-container)
+                update_container
+        ;;
+        update)
+                update_build
+                update_container
         ;;
         *)
                 usage
