@@ -7,35 +7,9 @@ volumes:
     external: true
 
 services:
-  nginx:
-    image: nginx:latest
-    container_name: pleroma-nginx
-    expose:
-      - "20091"
-    restart: always
-    tty: false
-    environment:
-      - VIRTUAL_HOST=${PLEROMA_HOSTNAME}
-      - VIRTUAL_PORT=${PLEROMA_VIRTUAL_PORT}
-      - VIRTUAL_PROTO=https
-      - LETSENCRYPT_HOST=${PLEROMA_HOSTNAME}
-      - LETSENCRYPT_EMAIL=${PLEROMA_LETSENCRYPT_EMAIL}
-      - LETSENCRYPT_TEST=false
-    links:
-      - web
-    depends_on:
-      - web
-    volumes:
-      - ./setting/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./setting/nginx/templates:/etc/nginx/templates
-      - certs:/etc/nginx/certs
-    networks:
-      - front
-      - back-pleroma
-
   db:
     restart: always
-    image: postgres:9.6-alpine
+    image: postgres:15.1
     container_name: pleroma-db
     environment:
       POSTGRES_USER: pleroma
@@ -58,19 +32,22 @@ services:
     environment:
       MIX_ENV: prod
     ports:
-      - '127.0.0.1:4000:4000'
+      - '4000:4000'
     volumes:
       - ./data/pleroma/content/uploads:/var/lib/pleroma/uploads
       - ./pleroma-custom/static:/var/lib/pleroma/static
-      - ./setting/web/config/prod.secret.exs:/etc/pleroma/config.exs:ro
+      - ./data/pleroma/config:/etc/pleroma:ro
     depends_on:
       - db
     networks:
-      - front
+      - caddy
       - back-pleroma
+    labels:
+      caddy: ${PLEROMA_HOSTNAME}
+      caddy.reverse_proxy: "web:4000"
 
 networks:
-  front:
+  caddy:
     external: true
   back-pleroma:
     external: true

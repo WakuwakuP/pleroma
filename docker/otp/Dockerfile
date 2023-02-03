@@ -29,7 +29,8 @@ RUN apk -U upgrade \
     imagemagick \
     ffmpeg \
     exiftool \
-    unzip
+    unzip \
+    libcrypto1.1
 
 ARG UID=911
 ARG GID=911
