@@ -74,7 +74,7 @@ update_build() {
 
 update_container() {
         docker-compose down
-        docker-compose run --rm web migrate
+        docker-compose run --rm --entrypoint=/opt/pleroma/bin/pleroma_ctl web migrate
         docker-compose up -d
 }
 
